@@ -1,0 +1,7 @@
+base   untis
+author Frank Schiebel
+email  frank@linuxmuster.net
+date   2012-10-03
+name   untis plugin
+desc   A simple plugin for displaying untis subtitution tables within DokuWiki
+url    https://github.com/ironiemix
