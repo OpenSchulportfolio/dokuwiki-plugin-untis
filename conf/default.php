@@ -9,3 +9,6 @@
 $conf['UriToday']    = 'untis:plans:lehrer_heute:subst_001.htm';
 $conf['UriTomorrow']    = 'untis:plans:lehrer_morgen:subst_001.htm';
 $conf['UriRoomplan']    = 'untis:plans:raumplan:raumplan.htm';
+$conf['curl_uploadsecret'] = '';
+$conf['upload_filename'] = 'untis.zip';
+

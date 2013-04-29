@@ -192,6 +192,31 @@ function _getHtmlCurl($uri) {
     return $str;
 }
 
+function _unZipArchive($zip_file,$directory)
+{
+    //create a new ZipArchive class
+    $zip_archve = new ZipArchive();
+
+    //attempt to open the archive file
+    $results = $zip_archive->open($zip_file);
+
+    switch($results)
+    {
+        case TRUE:
+            //format the directory properly
+            $directory = str_replace("\\","/",$directory);
+            //extract the files
+            $zip_arvhive->extractTo($directory);
+            //close the ZipArchive
+            $zip_archive->close();
+            //Return True
+            return true;
+            break;
+        case FALSE:
+            return false;
+    }
+}
+
 }
 
 // vim:ts=4:sw=4:et:
