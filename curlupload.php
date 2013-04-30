@@ -6,9 +6,9 @@ require_once(DOKU_INC.'inc/init.php');
 
 
 // some sanity checks
-//if ( ! isset($_REQUEST['secret']) ) {
-//    exit;
-//}
+if ( ! isset($_REQUEST['secret']) ) {
+    exit;
+}
 
 // determine upload filename and create incoming
 // directory if it does not exist

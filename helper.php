@@ -24,9 +24,9 @@ function getMethods(){
       'name'   => 'untis2timesub',
       'desc'   => 'Converts untis csv to timesub',
       'params' => array(
-        'infile' => 'string',
-        'outfile' => 'string',
-        'number (optional)' => 'integer'),
+      'infile' => 'string',
+      'outfile' => 'string',
+      'number (optional)' => 'integer'),
       'return' => array('pages' => 'array'),
     );
     // and more supported methods...
@@ -47,17 +47,20 @@ function getMethods(){
 function displayUntis($untisday) {
     global $conf;
 
+    // Aktualisiere die paene aus dem zip
+    $this->_unZipArchive();
+
     $planfileIDs = explode("\n",$this->getConf('substplanfiles'));
 
     $planfilesTested = array();
     foreach ($planfileIDs as $planfile) {
-        $planfile = str_replace(":","/",$planfile);
-        $planfile = str_replace("//","/", $conf['savedir'] . "/media/" . $planfile);
-        if(file_exists($planfile)) {
+    $planfile = mediaFN($planfile);
+        if(file_exists($planfile) && !is_dir($planfile)) {
             $planfilesTested[] = $planfile;
         }
-        $html = $this->_untisCreateMenu($planfilesTested);
     }
+
+    $html = $this->_untisCreateMenu($planfilesTested);
 
     if(!isset($planfilesTested[$untisday])) {
         msg("Für den angegebenen Tag ist kein Plan hinterlegt.");
@@ -88,12 +91,8 @@ function displayUntis($untisday) {
 function _untisReadHtml ($infile) {
     global $conf;
 
-    // Aktualisiere die paene aus dem zip
-    $this->_unZipArchive();
-
     // lesen des html files
     $html = file_get_html("$infile");
-    #$html =  str_get_html($this->_getHtmlCurl("https://www.dropbox.com/sh/1n0k2wecvhe21w3/KJBcnLVqZT/lehrer_morgen/subst_001.htm"));
     $html_output = "";
 
     // überschrift
@@ -267,7 +266,6 @@ function _postProcessFiles($dir, $files) {
     global $lang;
 
     require_once(DOKU_INC.'inc/media.php');
-    $reldir = preg_replace("#".$conf['mediadir']."#", '/', $dir) . '/';
 
     $dirs     = array();
     $tmp_dirs = array();
