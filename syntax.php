@@ -58,11 +58,19 @@ class syntax_plugin_untis extends DokuWiki_Syntax_Plugin {
         $type = $data[0];
         $optiondata= $data[1];
 
-        if ($type == "untis" ) {
-            $renderer->doc .= $myhf->untisReadHtml($optiondata);
+
+        $untisday = 0;
+        if ( isset($_REQUEST['untisday'])) {
+            $untisday = $_REQUEST['untisday'];
         }
-        if ($type == "untismenu") {
-            $renderer->doc .= $myhf->untisCreateMenu($optiondata);
+
+        $show_roomplan = 0;
+        if ( isset($_REQUEST['untisroomplan'])) {
+            $show_roomplan = 1;
+        }
+
+        if ($type == "untis" ) {
+            $renderer->doc .= $myhf->displayUntis($untisday);
         }
 
         return true;

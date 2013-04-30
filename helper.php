@@ -33,21 +33,63 @@ function getMethods(){
     return $result;
   }
 
-/*
- * Reads Untis HTML Output
- */
-function untisReadHtml ($displaytype ) {
+/**
+  * Wrapper funktion for displaying the plan page
+  *
+  * This function checks the given configuration, builds an array of
+  * verified plan files and creates the html output which is returned to
+  * the plugins sysntax component.
+  *
+  * @author Frank Schiebel <frank@linuxmuster.net>
+  * @param in $untisday daynumber to decide wich plan to display 0,1,2,3...
+  * @return string
+  */
+function displayUntis($untisday) {
     global $conf;
 
-    if ($displaytype == "today") {
-        $infile = $this->getConf('UriToday');
-    }
-    if ($displaytype == "tomorrow") {
-        $infile = $this->getConf('UriTomorrow');
+    $planfileIDs = explode("\n",$this->getConf('substplanfiles'));
+
+    $planfilesTested = array();
+    foreach ($planfileIDs as $planfile) {
+        $planfile = str_replace(":","/",$planfile);
+        $planfile = str_replace("//","/", $conf['savedir'] . "/media/" . $planfile);
+        if(file_exists($planfile)) {
+            $planfilesTested[] = $planfile;
+        }
+        $html = $this->_untisCreateMenu($planfilesTested);
     }
 
-    $infile = str_replace(":","/",$infile);
-    $infile = str_replace("//","/", $conf['savedir'] . "/media/" . $infile);
+    if(!isset($planfilesTested[$untisday])) {
+        msg("Für den angegebenen Tag ist kein Plan hinterlegt.");
+        return;
+    }
+
+    if(!file_exists($planfilesTested[$untisday])) {
+        msg("Datei existiert nicht:" . $planfilesTested[$untisday] .". Passen Sie die Konfiguration an");
+        return;
+    }
+
+    $html .= $this->_untisReadHtml($planfilesTested[$untisday]);
+
+    return $html;
+
+}
+
+/**
+  * Reads untis html files
+  *
+  * This function reads the output of untis info-modul html files
+  * and creates a userfriendly table for displaying in dokuwiki
+  *
+  * @author Frank Schiebel <frank@linuxmuster.net>
+  * @param string $infile filename to read html from
+  * @return string
+  */
+function _untisReadHtml ($infile) {
+    global $conf;
+
+    // Aktualisiere die paene aus dem zip
+    $this->_unZipArchive();
 
     // lesen des html files
     $html = file_get_html("$infile");
@@ -127,93 +169,130 @@ function untisReadHtml ($displaytype ) {
     return $html_output;
 }
 
-
-function untisCreateMenu($optiondata) {
+/**
+  * Create navigation menu to all plans
+  *
+  * This function reads every given planfile to determine the
+  * real date of the plan and creates a menu with the dates to
+  * click on, linked to the corresponding plan files
+  *
+  * @author Frank Schiebel <frank@linuxmuster.net>
+  * @param array $infiles array with verified filenames to read
+  * @return string
+  */
+function _untisCreateMenu($infiles) {
     global $conf;
-
-    // split options into parts
-    $configparts = explode("|" , $optiondata);
-    $pagetoday = $configparts[0];
-    $pagetomorrow = $configparts[1];
-    $pageroomplan = $configparts[2];
+    global $ID;
 
     // get real dates out of html
-    $infiles = array();
     $datelinks = array();
-    $infiles[] = $this->getConf('UriToday');
-    $infiles[] = $this->getConf('UriTomorrow');
-    foreach($infiles as $infile) {
-        $infile = str_replace(":","/",$infile);
-        $infile = str_replace("//","/", $conf['savedir'] . "/media/" . $infile);
+    $returnhtml = "<div class=\"untismenu\">";
+    foreach($infiles as $key=>$infile) {
         // lesen des html files
         $html = file_get_html("$infile");
         $res = $html->find("div.mon_title");
         $daylink= $res[0]->plaintext;
         $daylink = explode(" ",$daylink);
-        $daylinks[] = $daylink[1] . " " . $daylink[0];
+        $returnhtml .=  "<a href=\"".wl($ID,"untisday=$key")."\">".$daylink[0]."</a>";
     }
-
-
-    $html =  "<div class=\"untismenu\"><a href=\"".wl($pagetoday)."\">".$daylinks[0]."</a>";
-    $html .= "<a href=\"".wl($pagetomorrow)."\">".$daylinks[1]."</a></div>";
-    return $html;
-
+    $returnhtml .= "</div>";
+    return $returnhtml;
 
 }
 
+/**
+  * Unzip uploaded archive file
+  *
+  * The plans have to be uploaded to the server as a zip file. This function
+  * extracts the plan file according to the plugin configuration, so that 
+  * later on the plans can be displayed.
+  *
+  * @author Frank Schiebel <frank@linuxmuster.net>
+  * @return boolean
+  */
+function _unZipArchive() {
 
-function _getHtmlCurl($uri) {
+    global $conf;
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, "$uri");
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($curl, CURLOPT_USERAGENT, "Wget/1.13.4 (linux-gnu)");
-    curl_setopt($curl, CURLOPT_AUTOREFERER, 1);
-    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
-    $str = curl_exec($curl);
-    curl_close($curl);
+    $upload_file = cleanID($this->getConf('upload_filename'));
+    $upload_filepath = str_replace(":","/",$upload_file);
+    $upload_filepath = str_replace("//","/", $conf['savedir'] . "/media/" . $upload_filepath);
+    $zip_file = $upload_filepath;
 
-    // Dropbox redirect?
-    $html =  str_get_html($str);
-    $res = $html->find("title");
-    if ( $res[0]->plaintext == "Found" ) {
-        $trueuri = $html->find("a",0)->plaintext;
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, "$trueuri");
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_USERAGENT, "Wget/1.13.4 (linux-gnu)");
-        curl_setopt($curl, CURLOPT_AUTOREFERER, 1);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
-        $str = curl_exec($curl);
-        curl_close($curl);
+    $directory = cleanID($this->getConf('extract_target'));;
+    $directory = str_replace(":","/",$directory);
+    $directory = str_replace("//","/", $conf['savedir'] . "/media/" . $directory);
+    if ($this->getConf('debug')) {
+        msg("Trying to extract zip-file: $zip_file");
+        msg("Destination directory: $directory");
     }
-    $html->clear();
 
-    return $str;
-}
+    $dir = io_mktmpdir();
+    if($dir) {
+        $this->tmpdir = $dir;
+    } else {
+        msg('Failed to create tmp dir, check permissions of cache/ directory', -1);
+        return false;
+    }
 
-function _unZipArchive($zip_file,$directory)
-{
-    //create a new ZipArchive class
-    $zip_archve = new ZipArchive();
+    // failed to create tmp dir stop here
+    if(!$this->tmpdir) return false;
+
+    // include ZipLib
+    require_once(DOKU_INC."inc/ZipLib.class.php");
+    //create a new ZipLib class
+    $zip = new ZipLib;
 
     //attempt to open the archive file
-    $results = $zip_archive->open($zip_file);
+    $result = $zip->Extract($zip_file,$this->tmpdir);
 
-    switch($results)
-    {
-        case TRUE:
-            //format the directory properly
-            $directory = str_replace("\\","/",$directory);
-            //extract the files
-            $zip_arvhive->extractTo($directory);
-            //close the ZipArchive
-            $zip_archive->close();
-            //Return True
-            return true;
-            break;
-        case FALSE:
-            return false;
+    if($result) {
+        $files = $zip->get_List($zip_file);
+        $this->_postProcessFiles($directory, $files);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Checks the mime type and fixes the permission and filenames of the
+ * extracted files. Taken from Michel Kliers archiveupload plugin.
+ *
+ * @author Michael Klier <chi@chimeric.de>
+ * @author Frank Schiebel <frank@linuxmuster.net>
+ */
+function _postProcessFiles($dir, $files) {
+    global $conf;
+    global $lang;
+
+    require_once(DOKU_INC.'inc/media.php');
+    $reldir = preg_replace("#".$conf['mediadir']."#", '/', $dir) . '/';
+
+    $dirs     = array();
+    $tmp_dirs = array();
+
+    foreach($files as $file) {
+        $fn_old = $file['filename'];            // original filename
+        $fn_new = str_replace('/',':',$fn_old); // target filename
+        $fn_new = str_replace(':', '/', cleanID($fn_new));
+
+        if(substr($fn_old, -1) == '/') { 
+            // given file is a directory
+            io_mkdir_p($dir.'/'.$fn_new);
+            chmod($dir.'/'.$fn_new, $conf['dmode']);
+            array_push($dirs, $dir.'/'.$fn_new);
+            array_push($tmp_dirs, $this->tmpdir.'/'.$fn_old);
+        } else {
+            // move the file
+            // FIXME check for success ??
+            rename($this->tmpdir.'/'.$fn_old, $dir.'/'.$fn_new);
+            chmod($dir.'/'.$fn_new, $conf['fmode']);
+            if ($this->getConf('debug')) {
+                msg("Extracted: $dir/$fn_new", 1);
+            }
+
+        }
     }
 }
 
