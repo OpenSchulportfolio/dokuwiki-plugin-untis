@@ -44,13 +44,18 @@ function getMethods(){
   * @param in $untisday daynumber to decide wich plan to display 0,1,2,3...
   * @return string
   */
-function displayUntis($untisday) {
+function displayUntis($untisday,$displaytarget) {
     global $conf;
+    print $displaytarget;
 
     // Aktualisiere die paene aus dem zip
     $this->_unZipArchive();
 
-    $planfileIDs = explode("\n",$this->getConf('substplanfiles'));
+    if ( $displaytarget == "lehrer" ) {
+        $planfileIDs = explode("\n",$this->getConf('substplanfiles_lehrer'));
+    } else {
+        $planfileIDs = explode("\n",$this->getConf('substplanfiles_aula'));
+    }
 
     $planfilesTested = array();
     foreach ($planfileIDs as $planfile) {
@@ -71,15 +76,23 @@ function displayUntis($untisday) {
         msg("Datei existiert nicht:" . $planfilesTested[$untisday] .". Passen Sie die Konfiguration an");
         return;
     }
+    // statische kopfinfos lesen
+    $html .= $this->_untisReadHtmlHeader($planfilesTested[$untisday]);
+    // vertretungstabelle lesen
 
-    $html .= $this->_untisReadHtml($planfilesTested[$untisday]);
+    if ( $displaytarget == "lehrer" ) {
+        $html .= $this->_untisReadHtmlSubstsLehrer($planfilesTested[$untisday]);
+    } else {
+        $html .= $this->_untisReadHtmlSubstsAula($planfilesTested[$untisday]);
+    }
+
 
     return $html;
 
 }
 
 /**
-  * Reads untis html files
+  * Reads untis html files: Headersection
   *
   * This function reads the output of untis info-modul html files
   * and creates a userfriendly table for displaying in dokuwiki
@@ -88,7 +101,7 @@ function displayUntis($untisday) {
   * @param string $infile filename to read html from
   * @return string
   */
-function _untisReadHtml ($infile) {
+function _untisReadHtmlHeader ($infile) {
     global $conf;
 
     // lesen des html files
@@ -122,6 +135,91 @@ function _untisReadHtml ($infile) {
         }
         $html_output .= "</table>";
 
+    //speicher freigeben
+    $html->clear();
+
+    return $html_output;
+}
+
+
+/**
+  * Reads untis html files
+  *
+  * This function reads the output of untis info-modul html files
+  * and creates a userfriendly table for displaying in dokuwiki
+  *
+  * @author Frank Schiebel <frank@linuxmuster.net>
+  * @param string $infile filename to read html from
+  * @return string
+  */
+function _untisReadHtmlSubstsAula ($infile) {
+    global $conf;
+
+    // lesen des html files
+    $html = file_get_html("$infile");
+    $html_output = "";
+    // lesen der vertretungsliste
+    $lehrer = "";
+    $trclass = "header";
+    foreach ($html->find("table.mon_list") as $table) {
+        $html_output .= "<table class=\"sublist\">";
+        foreach ($table->find("tr") as $row ) {
+            $html_output .= "<tr class=\"$trclass\">";
+            if ( $res = $row->find('td[colspan=9]')) {
+                $lehrer = $res[0]->plaintext;
+                $lehrer = explode(" ", $lehrer);
+                $lehrer = $lehrer[0];
+                $trclass = $trclass == "eins" ? "zwei" : "eins";
+            } else {
+                if ($row->find("td") ){
+                    $html_output .= "<td>$lehrer</td>";
+                }
+                if ($row->find("th") ){
+                    $html_output .= "<th>$lehrer</th>";
+                }
+                foreach ($row->find("th") as $tdata ) {
+                    $html_output .= "<th>" . $tdata->plaintext . "</th>";
+                }
+                foreach ($row->find("td") as $tdata ) {
+                    $data_text = $tdata->plaintext;
+                    // FIXME to config
+                    $todos="Betreuung Aufsicht Vertretung Verlegung Absenz Entfall";
+                    if (strstr($todos, $data_text )) {
+                        $cssclass=strtolower($data_text);
+                        $tdclass=" class=\"$cssclass\"";
+                    } else {
+                        $tdclass="";
+                    }
+                    $html_output .= "<td$tdclass>" . $tdata->plaintext . "</td>";
+                }
+            }
+            $html_output .= "</tr>";
+        }
+        $html_output .= "</table>";
+    }
+
+    //speicher freigeben
+    $html->clear();
+
+    return $html_output;
+}
+
+/**
+  * Reads untis html files
+  *
+  * This function reads the output of untis info-modul html files
+  * and creates a userfriendly table for displaying in dokuwiki
+  *
+  * @author Frank Schiebel <frank@linuxmuster.net>
+  * @param string $infile filename to read html from
+  * @return string
+  */
+function _untisReadHtmlSubsts ($infile) {
+    global $conf;
+
+    // lesen des html files
+    $html = file_get_html("$infile");
+    $html_output = "";
     // lesen der vertretungsliste
     $lehrer = "";
     $trclass = "header";

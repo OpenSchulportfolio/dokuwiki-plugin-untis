@@ -7,7 +7,8 @@
 
 
 //$meta['fixme'] = array('string');
-$meta['substplanfiles']    = array('');
+$meta['substplanfiles_lehrer']    = array('');
+$meta['substplanfiles_aula']    = array('');
 $meta['roomplanfile']    = array('string');
 $meta['curl_uploadsecret'] = array('string');
 $meta['upload_filename'] = array('string');

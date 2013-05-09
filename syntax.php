@@ -56,7 +56,7 @@ class syntax_plugin_untis extends DokuWiki_Syntax_Plugin {
         $renderer->info['cache'] = false;
 
         $type = $data[0];
-        $optiondata= $data[1];
+        $displaytarget = $data[1];
 
 
         $untisday = 0;
@@ -70,7 +70,7 @@ class syntax_plugin_untis extends DokuWiki_Syntax_Plugin {
         }
 
         if ($type == "untis" ) {
-            $renderer->doc .= $myhf->displayUntis($untisday);
+            $renderer->doc .= $myhf->displayUntis($untisday,$displaytarget);
         }
 
         return true;
