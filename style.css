@@ -31,18 +31,22 @@ span.green {
     background: transparent url("img/green.gif") left 50% no-repeat;
     padding-left: 12px;
 }
+
 span.red {
     background: transparent url("img/red.gif") left 50% no-repeat;
     padding-left: 12px;
 }
+
 span.orange {
     background: transparent url("img/orange.gif") left 50% no-repeat;
     padding-left: 12px;
 }
+
 span.blue {
     background: transparent url("img/blue.gif") left 50% no-repeat;
     padding-left: 12px;
 }
+
 span.aktuell {
     background: transparent url("img/aktuell.gif") left 50% no-repeat;
     width: 62px;
