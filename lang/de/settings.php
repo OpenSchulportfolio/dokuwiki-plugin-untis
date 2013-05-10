@@ -15,6 +15,7 @@ $lang['roomplanfile'] = "Raumplandatei. Derzeit nicht verwendet.";
 $lang['curl_uploadsecret'] = 'Passwort, das zum Hochladen der Vertretungspläne per CURL nötig ist:<br />curl -k -F secret="geheim" -F filedata=@plans.zip https://SERVER/portfolio/curlupload.php';
 $lang['upload_filename'] = 'Der Dateiname mit vollständigen DokuWiki Pfad, als der der Plan hochgeladen werden soll.';
 $lang['extract_target'] = 'DokuWiki Namespace, in den das hochgeladene Archiv ausgepackt werden soll.';
+$lang['saveconftocachedir'] = "Ersetzugsliste im Cache-Verzeichnis speichern?";
 $lang['debug'] = 'Ausgaben zur Fehlersuche an/ausschalten';
 
 

@@ -14,5 +14,6 @@ $conf['roomplanfile']    = 'untis:plans:raumplan:raumplan.htm';
 $conf['curl_uploadsecret'] = '';
 $conf['upload_filename'] = 'untis:incoming:untis.zip';
 $conf['extract_target'] = 'untis:plans';
+$conf['saveconftocachedir'] = '1';
 $conf['debug'] = '1';
 
