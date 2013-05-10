@@ -46,7 +46,6 @@ function getMethods(){
   */
 function displayUntis($untisday,$displaytarget) {
     global $conf;
-    print $displaytarget;
 
     // Aktualisiere die paene aus dem zip
     $this->_unZipArchive();
@@ -77,7 +76,7 @@ function displayUntis($untisday,$displaytarget) {
         return;
     }
     // statische kopfinfos lesen
-    $html .= $this->_untisReadHtmlHeader($planfilesTested[$untisday]);
+    $html .= $this->_untisReadHtmlHeader($planfilesTested[$untisday],$displaytarget);
     // vertretungstabelle lesen
 
     if ( $displaytarget == "lehrer" ) {
@@ -101,7 +100,7 @@ function displayUntis($untisday,$displaytarget) {
   * @param string $infile filename to read html from
   * @return string
   */
-function _untisReadHtmlHeader ($infile) {
+function _untisReadHtmlHeader ($infile,$displaytarget) {
     global $conf;
 
     // lesen des html files
@@ -120,7 +119,7 @@ function _untisReadHtmlHeader ($infile) {
     $last_updated = $res[0]->plaintext;
     $last_updated = explode("and:", $last_updated);
     $last_updated = $last_updated[1];
-    $html_output .= "<div class=\"untishead\">Stand: " . $last_updated . "</div>";
+    $html_output .= "<div class=\"untishead versioninfo\">Stand: " . $last_updated . "/" . $this->getLang("$displaytarget") . "</div>";
 
     // tagesnachrichten
     foreach ($html->find("table.info") as $table) {
@@ -128,7 +127,12 @@ function _untisReadHtmlHeader ($infile) {
         foreach ($table->find("tr") as $row ) {
                 $html_output .= "<tr>";
                 foreach ($row->find("td") as $tdata ) {
-                    $html_output .= "<td>" . $tdata->plaintext . "</td>";
+                    if ($tdata->colspan) {
+                        $colspan = " colspan=\"" . $tdata->colspan."\" class=\"headerinfo\" ";
+                    } else {
+                        $colspan = "";
+                    }
+                    $html_output .= "<td" . $colspan . ">" . $tdata->plaintext . "</td>";
                 }
             }
             $html_output .= "</tr>";
@@ -155,6 +159,9 @@ function _untisReadHtmlHeader ($infile) {
 function _untisReadHtmlSubstsAula ($infile) {
     global $conf;
 
+    // welche spalten sollen ausgelasen werden?
+    $nodisplaycolumns = explode(",",$this->getConf('invisible_columns_aula'));
+
     // lesen des html files
     $html = file_get_html("$infile");
     $html_output = "";
@@ -177,20 +184,30 @@ function _untisReadHtmlSubstsAula ($infile) {
                 if ($row->find("th") ){
                     $html_output .= "<th>$lehrer</th>";
                 }
+
+                $column = 1;
                 foreach ($row->find("th") as $tdata ) {
-                    $html_output .= "<th>" . $tdata->plaintext . "</th>";
-                }
-                foreach ($row->find("td") as $tdata ) {
-                    $data_text = $tdata->plaintext;
-                    // FIXME to config
-                    $todos="Betreuung Aufsicht Vertretung Verlegung Absenz Entfall";
-                    if (strstr($todos, $data_text )) {
-                        $cssclass=strtolower($data_text);
-                        $tdclass=" class=\"$cssclass\"";
-                    } else {
-                        $tdclass="";
+                    if (!in_array($column,$nodisplaycolumns)) {
+                        $html_output .= "<th>" . $tdata->plaintext . "</th>";
                     }
-                    $html_output .= "<td$tdclass>" . $tdata->plaintext . "</td>";
+                    $column++;
+                }
+
+                $column = 1;
+                foreach ($row->find("td") as $tdata ) {
+                    if (!in_array($column,$nodisplaycolumns)) {
+                        $data_text = $tdata->plaintext;
+                        // FIXME to config
+                        $todos="Betreuung Aufsicht Vertretung Verlegung Absenz Entfall";
+                        if (strstr($todos, $data_text )) {
+                            $cssclass=strtolower($data_text);
+                            $tdclass=" class=\"$cssclass\"";
+                        } else {
+                            $tdclass="";
+                        }
+                        $html_output .= "<td$tdclass>" . $tdata->plaintext . "</td>";
+                    }
+                    $column++;
                 }
             }
             $html_output .= "</tr>";
@@ -214,9 +231,11 @@ function _untisReadHtmlSubstsAula ($infile) {
   * @param string $infile filename to read html from
   * @return string
   */
-function _untisReadHtmlSubsts ($infile) {
+function _untisReadHtmlSubstsLehrer ($infile) {
     global $conf;
 
+    // welche spalten sollen ausgelassen werden?
+    $nodisplaycolumns = explode(",",$this->getConf('invisible_columns_lehrer'));
     // lesen des html files
     $html = file_get_html("$infile");
     $html_output = "";
@@ -227,6 +246,8 @@ function _untisReadHtmlSubsts ($infile) {
         $html_output .= "<table class=\"sublist\">";
         foreach ($table->find("tr") as $row ) {
             $html_output .= "<tr class=\"$trclass\">";
+            // zwischenzeilen auslassen und stattdessen
+            // die lehrer in die 0. spalte voranstellen
             if ( $res = $row->find('td[colspan=11]')) {
                 $lehrer = $res[0]->plaintext;
                 $lehrer = explode(" ", $lehrer);
@@ -239,20 +260,29 @@ function _untisReadHtmlSubsts ($infile) {
                 if ($row->find("th") ){
                     $html_output .= "<th>$lehrer</th>";
                 }
+
+                $column = 1;
                 foreach ($row->find("th") as $tdata ) {
-                    $html_output .= "<th>" . $tdata->plaintext . "</th>";
-                }
-                foreach ($row->find("td") as $tdata ) {
-                    $data_text = $tdata->plaintext;
-                    // FIXME to config
-                    $todos="Betreuung Aufsicht Vertretung Verlegung Absenz Entfall";
-                    if (strstr($todos, $data_text )) {
-                        $cssclass=strtolower($data_text);
-                        $tdclass=" class=\"$cssclass\"";
-                    } else {
-                        $tdclass="";
+                    if (!in_array($column,$nodisplaycolumns)) {
+                        $html_output .= "<th>" . $tdata->plaintext . "</th>";
                     }
-                    $html_output .= "<td$tdclass>" . $tdata->plaintext . "</td>";
+                    $column++;
+                }
+                $column = 1;
+                foreach ($row->find("td") as $tdata ) {
+                    if (!in_array($column,$nodisplaycolumns)) {
+                        $data_text = $tdata->plaintext;
+                        // FIXME to config
+                        $todos="Betreuung Aufsicht Vertretung Verlegung Absenz Entfall";
+                        if (strstr($todos, $data_text )) {
+                            $cssclass=strtolower($data_text);
+                            $tdclass=" class=\"$cssclass\"";
+                        } else {
+                            $tdclass="";
+                        }
+                        $html_output .= "<td$tdclass>" . $tdata->plaintext . "</td>";
+                    }
+                    $column++;
                 }
             }
             $html_output .= "</tr>";

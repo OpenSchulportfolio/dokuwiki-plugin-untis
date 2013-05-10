@@ -1,49 +1,9 @@
-.mainfontsize { font-size: 14px;}
+table.sublist { border: 1px solid black; width: 100%;}
+table.substinfo { border: 1px solid black; width: 100%;}
+div.untishead {font-size: 80%; text-align:right;}
+td.headerinfo {background-color: #FFFAA8;}
 tr.eins { background-color: #fefefe; border-bottom: 1px dotted #cdcdcd;}
 tr.zwei { background-color: #dfdfdf; border-bottom: 1px dotted #cdcdcd;}
-span.version { color: #666; font-size: 80%;}
-td.staticlabels {width: 10.5em; }
-td.lehrername {width: 7em; }
-td.stunde {width: 2em; }
-td.klasse {width: 4em; }
-td.fach {width: 4em; }
-td.fach_aula {width: 8em; }
-td.raum {width: 3em; }
-td.fuer {width: 3em; }
-
-td.bt {border-top: 1px solid black;  }
-td.bibe {border-top: 1px solid black; background: #fffaa8;}
-td.sp2, td.sp3, td.sp4, td.sp5, td.sp6 {text-align: center;}
-td {padding: 3px;}
-.info { font-size: 85%; color: green; }
-
-div#tsmenu {width: 100%; height: 25px;}
-div#content div#tsmenu ul { 
-  text-indent:0; 
-  padding:0; 
-  margin:0; 
-  list-style-type:none; 
-  list-style-image:none;
-  }
-div#content div#tsmenu ul li { float: left; }
-div#content div#tsmenu ul li a { margin: 1px; font-size: 78%; padding: 4px; }
-a.timesub_menu { 
-    background: #efefef !important; 
-    border: 1px solid #666;
-    text-decoration: none !important;
-    color: black !important;
-    }
-a.ts_active_day { 
-    background: #a7d99d !important; 
-    border: 1px solid #666;
-    text-decoration: none !important;
-    color: black !important;
-    font-weight: bold;
-    }
-
-
-table.sublist { border: 1px solid black; width: 100%;}
-div.untishead {font-size: 80%; text-align:right;}
 
 td.absenz, td.entfall {
     padding-left: 15px;
@@ -66,5 +26,6 @@ div.untismenu a {
     margin-right: 5px;
     border: 1px solid #ccc;
 }
+
 
 
