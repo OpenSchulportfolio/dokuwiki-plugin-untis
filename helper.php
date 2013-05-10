@@ -264,7 +264,7 @@ function _untisReadHtmlSubstsLehrer ($infile) {
                 foreach ($row->find("td") as $tdata ) {
                     if (!in_array($column,$nodisplaycolumns)) {
                         $data_text = $tdata->plaintext;
-                        $html_output .= $this->_makeReplacements($data_text,$column,"td");
+                        $html_output .= "<td>" . $this->_makeReplacements($data_text,$column) . "</td>";
                     }
                     $column++;
                 }
