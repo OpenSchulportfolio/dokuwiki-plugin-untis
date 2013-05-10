@@ -1,0 +1,12 @@
+====== Konfiguration von Ersetzungen in der Stundenplananzeige  ======
+
+Hier können Sie Ersetzungen definieren, die in der Studenplananzeige automatisch vor der Ausgabe des Vertretungsplans vorgenommen werden, um z.B. sehr lange Lehrernamen abzukürzen oder bestimmte Ereigniskategorien mit einer der vordefinierten CSS-Klassen hervorzuheben.
+
+Das Format ist
+<code>
+Nummer  Suchmuster|Ersetzung|CSS-Klasse|Spaltennummer
+</code>
+
+  * Die Nummern der Ersetzungsregeln dürfen nur einmal vorkommen, andernfalls überschreibt die in der Datei weiter unten festgelegte Regel die zuerst definierte. Die Nummern müssen nicht fortlaufend sein.
+  * Die CSS-Klasse ist optional und kann auch weggelassen werden. Wenn eine Klasse angegeben wird, wird der Text in ein //span//-Element mit der angegebenen Klasse eingebettet. Vordefinierte Klassen sind ''green'', ''orange'', ''red'' und ''blue''. Bei diesen wird ein kleines Quadrat in der enstprechenden Farbe vor dem ersetzten Text platziert.
+  * Die Spaltennummer ist optional. Ist Sie angegeben, werden nur in der angegebenen Spalte Ersetzungen vorgenommen. Wenn keine CSS Klasse gewünscht ist und dennoch eine Spaltennummer spezifiziert werden soll, muss die durch eine "leere" CSS Klasse geschehen: zwei Senkrechte nacheinander. Wenn in der Plugin-Konfiguration Spalten von der Anzeige ausgenommen wurden, müssen diese trotzdem weiterhin mitgezählt werden! Spalte 7 ist also stets die 7. Spalte in der Original Untis HTML Ansicht.

@@ -7,11 +7,15 @@
 
 // keys need to match the langig setting name
 // $lang['fixme'] = 'FIXME';
-$lang['substplanfiles'] = "One file per line: alle the files, which are holding the html-export output of untis infomodule. Ordered by timeline.";
-$lang['curl_uploadsecret'] = 'Secret string to be checked when uploading via curl, has to be given on curl command-line:<br />curl -k -F secret="geheim" -F filedata=@plans.zip https://SERVER/portfolio/curlupload.php';
-$lang['upload_filename'] = 'Filename with full namespace, to which the zip-archive with the plans will be moved';
-$lang['extract_target'] = 'Namespace, where the contents of the uploaded archive will be extracted to';
-$lang['debug'] = 'Show debugging messages';
+$lang['substplanfiles_lehrer'] = "Alle HTML-Dateien, die zur Anzeige der Lehrerversion herangezogen werden sollen. Eine Datei pro Zeile, in aufsteigender zeitlicher Reihenfolge.";
+$lang['substplanfiles_aula'] = "Alle HTML-Dateien, die zur Anzeige der Schülerversion herangezogen werden sollen. Eine Datei pro Zeile, in aufsteigender zeitlicher Reihenfolge.";
+$lang['invisible_columns_lehrer'] = "Spalten, die in der Lehreranzeige nicht dargestellt werden sollen. Durch Kommata getrennt, die Zählung beginnt bei 1. Grundlage ist die original Untis HTML Datei.";
+$lang['invisible_columns_aula'] = "Spalten, die in der Schüleranzeige nicht dargestellt werden sollen. Durch Kommata getrennt, die Zählung beginnt bei 1. Grundlage ist die original Untis HTML Datei.";
+$lang['roomplanfile'] = "Raumplandatei. Derzeit nicht verwendet.";
+$lang['curl_uploadsecret'] = 'Passwort, das zum Hochladen der Vertretungspläne per CURL nötig ist:<br />curl -k -F secret="geheim" -F filedata=@plans.zip https://SERVER/portfolio/curlupload.php';
+$lang['upload_filename'] = 'Der Dateiname mit vollständigen DokuWiki Pfad, als der der Plan hochgeladen werden soll.';
+$lang['extract_target'] = 'DokuWiki Namespace, in den das hochgeladene Archiv ausgepackt werden soll.';
+$lang['debug'] = 'Ausgaben zur Fehlersuche an/ausschalten';
 
 
 

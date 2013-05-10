@@ -21,8 +21,8 @@ class  helper_plugin_untis extends DokuWiki_Plugin {
 function getMethods(){
     $result = array();
     $result[] = array(
-      'name'   => 'untis2timesub',
-      'desc'   => 'Converts untis csv to timesub',
+      'name'   => 'untis',
+      'desc'   => 'Untis',
       'params' => array(
       'infile' => 'string',
       'outfile' => 'string',
@@ -197,15 +197,7 @@ function _untisReadHtmlSubstsAula ($infile) {
                 foreach ($row->find("td") as $tdata ) {
                     if (!in_array($column,$nodisplaycolumns)) {
                         $data_text = $tdata->plaintext;
-                        // FIXME to config
-                        $todos="Betreuung Aufsicht Vertretung Verlegung Absenz Entfall";
-                        if (strstr($todos, $data_text )) {
-                            $cssclass=strtolower($data_text);
-                            $tdclass=" class=\"$cssclass\"";
-                        } else {
-                            $tdclass="";
-                        }
-                        $html_output .= "<td$tdclass>" . $tdata->plaintext . "</td>";
+                        $html_output .= "<td>". $this->_makeReplacements($data_text,$column) . "</td>";
                     }
                     $column++;
                 }
@@ -272,15 +264,7 @@ function _untisReadHtmlSubstsLehrer ($infile) {
                 foreach ($row->find("td") as $tdata ) {
                     if (!in_array($column,$nodisplaycolumns)) {
                         $data_text = $tdata->plaintext;
-                        // FIXME to config
-                        $todos="Betreuung Aufsicht Vertretung Verlegung Absenz Entfall";
-                        if (strstr($todos, $data_text )) {
-                            $cssclass=strtolower($data_text);
-                            $tdclass=" class=\"$cssclass\"";
-                        } else {
-                            $tdclass="";
-                        }
-                        $html_output .= "<td$tdclass>" . $tdata->plaintext . "</td>";
+                        $html_output .= $this->_makeReplacements($data_text,$column,"td");
                     }
                     $column++;
                 }
@@ -421,6 +405,71 @@ function _postProcessFiles($dir, $files) {
         }
     }
 }
+
+/**
+* Replaces strings in the substtable according to config settings
+*
+* @author Frank Schiebel <frank@linuxmuster.net>
+*
+* @param string $data string
+* @return string html tagged replaced string
+*/
+function _makeReplacements($data,$column) {
+
+    $replacements = confToHash($this->_getsavedir().'/untis-replacements.conf');
+    $lastclass = "";
+    foreach($replacements as $replacement) {
+        list($needle, $rtext,$cssclass, $targetcolumn) = explode("|",$replacement);
+        $needle = trim($needle);
+        $rtext = trim($rtext);
+        $cssclass = trim($cssclass);
+        $targetcolumn = trim($targetcolumn);
+        if (!$targetcolumn && strstr($data,$needle)) {
+            $lastclass = $cssclass;
+            $data = str_replace($needle,$rtext,$data);
+        } elseif ( $targetcolumn == $column && strstr($data,$needle)) {
+            $lastclass = $cssclass;
+            $data = str_replace($needle,$rtext,$data);
+        }
+        unset($needle,$rtext,$cssclass,$targetcolumn);
+    }
+    if ($lastclass != "" ) {
+        $html = $this->_htmlTagText($data,"span",$lastclass);
+    } else {
+        $html = $data;
+    }
+    return $html;
+
+}
+
+/**
+ *
+ **/
+function _htmlTagText($text,$htmltag,$cssclasses) {
+    if ( $cssclasses == "" ) {
+    #    print "$text NOCLASS <br>";
+        $html = "<".$htmltag.">" . $text ."</$htmltag>";
+    } else {
+     #   print "$text CLASS $cssclasses<br>";
+        $html = "<".$htmltag . " class=\"".$cssclasses."\">" . $text ."</$htmltag>";
+    }
+    return $html;
+
+}
+
+/**
+* get savedir
+*/
+function _getsavedir() {
+    global $conf;
+    if ( $this->getConf('saveconftocachedir') ) {
+        return rtrim($conf['savedir'],"/") . "/cache";
+    } else {
+        return dirname(__FILE__);
+    }
+}
+
+
 
 }
 
