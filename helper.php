@@ -342,7 +342,7 @@ function _unZipArchive() {
     if($dir) {
         $this->tmpdir = $dir;
     } else {
-        msg('Failed to create tmp dir, check permissions of cache/ directory', -1);
+        msg("Failed to create tmp dir, check permissions of cache/ directory", -1);
         return false;
     }
 
@@ -350,7 +350,7 @@ function _unZipArchive() {
     if(!$this->tmpdir) return false;
 
     // include ZipLib
-    require_once(DOKU_INC."inc/ZipLib.class.php");
+    require_once(DOKU_PLUGIN."untis/ZipLib.class.php");
     //create a new ZipLib class
     $zip = new ZipLib;
 
